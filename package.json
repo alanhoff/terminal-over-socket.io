@@ -1,0 +1,24 @@
+{
+  "name": "terminal-over-socket.io",
+  "version": "0.0.0",
+  "description": "I'm batman.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/alanhoff/terminal-over-socket.io"
+  },
+  "author": "Alan Hoffmeister",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/alanhoff/terminal-over-socket.io/issues"
+  },
+  "homepage": "https://github.com/alanhoff/terminal-over-socket.io",
+  "dependencies": {
+    "ansi-html-stream": "0.0.3",
+    "express": "^4.4.5",
+    "socket.io": "^1.0.6"
+  }
+}

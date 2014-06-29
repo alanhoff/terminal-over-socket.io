@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Terminal</title>
+    <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/meyer-reset/2.0/reset.min.css">
+    <style type="text/css">
+        body {
+            padding: 10px 15px 10px 15px;
+            background: black;
+            font-family: monaco, monospace;
+            font-size: 16px;
+            color: white;
+        }
+
+        .input {
+            clear: both;
+            height: 16px;
+            margin: 5px 0 5px 0;
+            font-weight: bolder;
+        }
+
+        .command {
+            float: right;
+            width: 99%;
+        }
+
+        .command:focus {
+            outline: 0;
+        }
+
+        .ps1 {
+            float: left;
+            width: 1%;
+        }
+    </style>
+</head>
+<body>
+    <script type="text/javascript" src="//cdn.jsdelivr.net/g/socket.io-client@1.0(socket.io.min.js),jquery@2.1(jquery.min.js)"></script>
+    <script type="text/javascript">
+
+        // Para quem não conhece o JSDelivr, recomendo
+        // dar uma olhada, excelente CDN com uma API maravilhosa
+        // feita em Node.js
+        // http://www.jsdelivr.com
+
+        // Conectamos nosso navegador ao servidor que enviou esse html
+        var socket = io.connect();
+
+        // Escutamos pelo evento data, que é quando o bash
+        // larga alguma coisa para nós
+        socket.on('data', function(data){
+
+            // Vamos fazer o append no documento, com as tags pre
+            // os espaços em brancos e quebras de linha aparacerão
+            // normalmente
+            $('body').append('<pre>' + data + '</pre>');
+
+            // Por último mostramos uma nova linha esperando por outro comando.
+            showPrompt();
+        });
+
+        var focusPrompt = function(){
+
+            // Fazemos o cursor piscar na nossa linha de comando
+            $('div[contenteditable]').last().focus();
+        };
+
+        var showPrompt = function(){
+
+            // Aqui basicamente estou inserindo uma nova linha de
+            // comando no documento, para tentar ficar parecido com
+            // o terminal que usamos no dia a dia.
+            var prompt = '' +
+            '<div class="input">' +
+                '<div class="ps1">$</div>' +
+                '<div class="command" contenteditable></div>' +
+            '</div>';
+
+
+            $('div.command').last().removeAttr('contenteditable');
+            $('body').append(prompt);
+            focusPrompt();
+        };
+
+        $(document).on('keypress', 'div.command', function(event){
+
+            // Quando teclarmos o enter na linha de comando, é hora de
+            // mandar um evento para o servidor dizendo que queremos
+            // executar uma linha
+            if(event.keyCode !== 13)
+                return;
+
+            var command = $(this).text();
+            socket.emit('data', command + '\n');
+
+            $(this).removeAttr('contenteditable');
+
+            event.preventDefault();
+            return false;
+        });
+
+        $(document).on('keypress', function(event){
+
+            // Alguns comandos, como o rm e o cd não devolvem nenhum
+            // output, assim ficaríamos presos na linha de comando
+            // sem poder enviar um comando novamente, com esse hack
+            // se apertarmos enter enquanto estivermos esperando o retorno
+            // vamos ganhar mais uma linha de comando.
+            if(event.keyCode !== 13 || $('div[contenteditable]').length)
+                return;
+
+            showPrompt();
+
+            event.preventDefault();
+            return false;
+        });
+
+        // Para não se perder pelo documento.
+        $(document).on('click', function(event){
+            focusPrompt();
+        });
+
+        // Script acabou de executar, vamos mostrar a primeira linha
+        // de comando.
+        showPrompt();
+    </script>
+</body>
+</html>
